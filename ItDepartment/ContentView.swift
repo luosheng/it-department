@@ -8,16 +8,35 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var animating = false
+    
+    private var logo: some View {
+        Image(systemName: "arrow.triangle.2.circlepath")
+            .font(.system(size: 100))
+            .imageScale(.large)
+            .foregroundStyle(.tint)
+            .tint(.indigo)
+    }
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        VStack(spacing: 40) {
+            if #available(macOS 14, *) {
+                logo
+                    .symbolEffect(.pulse, options: .repeat(Int.max), value: animating)
+            } else {
+                logo
+            }
+            Text("Hello, IT")
+                .font(.largeTitle)
+                .bold()
         }
+        .frame(width: 300, height: 300)
         .padding()
         .task {
             setupScript()
+            withAnimation {
+                animating = true
+            }
         }
     }
     
