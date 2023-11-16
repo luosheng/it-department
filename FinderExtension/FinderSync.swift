@@ -51,18 +51,6 @@ class FinderSync: FIFinderSync {
     
     // MARK: - Menu and toolbar item support
     
-    override var toolbarItemName: String {
-        return "FinderSy"
-    }
-    
-    override var toolbarItemToolTip: String {
-        return "FinderSy: Click the toolbar item for a menu."
-    }
-    
-    override var toolbarItemImage: NSImage {
-        return NSImage(named: NSImage.cautionName)!
-    }
-    
     override func menu(for menuKind: FIMenuKind) -> NSMenu {
         switch menuKind {
         case .contextualMenuForContainer,
