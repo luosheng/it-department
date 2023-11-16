@@ -9,20 +9,20 @@ import Cocoa
 import FinderSync
 
 class FinderSync: FIFinderSync {
-
-    var myFolderURL = URL(fileURLWithPath: "/Users/Shared/MySyncExtension Documents")
     
     override init() {
         super.init()
-        
-        NSLog("FinderSync() launched from %@", Bundle.main.bundlePath as NSString)
-        
-        // Set up the directory we are syncing.
-        FIFinderSyncController.default().directoryURLs = [self.myFolderURL]
-        
-        // Set up images for our badge identifiers. For demonstration purposes, this uses off-the-shelf images.
-        FIFinderSyncController.default().setBadgeImage(NSImage(named: NSImage.colorPanelName)!, label: "Status One" , forBadgeIdentifier: "One")
-        FIFinderSyncController.default().setBadgeImage(NSImage(named: NSImage.cautionName)!, label: "Status Two", forBadgeIdentifier: "Two")
+        let finderSync = FIFinderSyncController.default()
+        if let mountedVolumes = FileManager.default.mountedVolumeURLs(includingResourceValuesForKeys: nil, options: [.skipHiddenVolumes]) {
+            finderSync.directoryURLs = Set<URL>(mountedVolumes)
+        }
+        // Monitor volumes
+        let notificationCenter = NSWorkspace.shared.notificationCenter
+        notificationCenter.addObserver(forName: NSWorkspace.didMountNotification, object: nil, queue: .main) { notification in
+            if let volumeURL = notification.userInfo?[NSWorkspace.volumeURLUserInfoKey] as? URL {
+                finderSync.directoryURLs.insert(volumeURL)
+            }
+        }
     }
     
     // MARK: - Primary Finder Sync protocol methods
@@ -63,21 +63,23 @@ class FinderSync: FIFinderSync {
     }
     
     override func menu(for menuKind: FIMenuKind) -> NSMenu {
-        // Produce a menu for the extension.
+        switch menuKind {
+        case .contextualMenuForContainer,
+                .contextualMenuForItems:
+            return createMenu()
+        default:
+            return NSMenu(title: "")
+        }
+    }
+    
+    private func createMenu() -> NSMenu {
         let menu = NSMenu(title: "")
-        menu.addItem(withTitle: "Example Menu Item", action: #selector(sampleAction(_:)), keyEquivalent: "")
+        menu.addItem(withTitle: "重启输入法", action: #selector(restartSCIM(_:)), keyEquivalent: "")
         return menu
     }
     
-    @IBAction func sampleAction(_ sender: AnyObject?) {
-        let target = FIFinderSyncController.default().targetedURL()
-        let items = FIFinderSyncController.default().selectedItemURLs()
+    @IBAction func restartSCIM(_ sender: AnyObject?) {
         
-        let item = sender as! NSMenuItem
-        NSLog("sampleAction: menu item: %@, target = %@, items = ", item.title as NSString, target!.path as NSString)
-        for obj in items! {
-            NSLog("    %@", obj.path as NSString)
-        }
     }
 
 }
