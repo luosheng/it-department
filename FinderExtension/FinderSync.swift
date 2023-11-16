@@ -9,9 +9,10 @@ import Cocoa
 import FinderSync
 
 class FinderSync: FIFinderSync {
-    
     override init() {
+        
         super.init()
+        
         let finderSync = FIFinderSyncController.default()
         if let mountedVolumes = FileManager.default.mountedVolumeURLs(includingResourceValuesForKeys: nil, options: [.skipHiddenVolumes]) {
             finderSync.directoryURLs = Set<URL>(mountedVolumes)
@@ -79,7 +80,21 @@ class FinderSync: FIFinderSync {
     }
     
     @IBAction func restartSCIM(_ sender: AnyObject?) {
-        
+        guard let path = try? FileManager.default.url(for: .applicationScriptsDirectory, in: .userDomainMask, appropriateFor: nil, create: true) else {
+            return
+        }
+        let scriptURL = path.appending(component: "kill-scim.scpt")
+        guard FileManager.default.fileExists(atPath: scriptURL.path(percentEncoded: false)) else {
+            return
+        }
+        guard let script = try? NSUserAppleScriptTask(url: scriptURL) else {
+            return
+        }
+        script.execute { error in
+            if let error {
+                print("\(error)")
+            }
+        }
     }
 
 }
