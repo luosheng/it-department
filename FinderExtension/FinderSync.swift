@@ -74,8 +74,12 @@ class FinderSync: FIFinderSync {
     }
     
     private func createMenu() -> NSMenu {
+        let submenu = NSMenu(title: "")
+        submenu.addItem(withTitle: "重启输入法", action: #selector(restartSCIM(_:)), keyEquivalent: "")
+        
         let menu = NSMenu(title: "")
-        menu.addItem(withTitle: "重启输入法", action: #selector(restartSCIM(_:)), keyEquivalent: "")
+        let menuItem = menu.addItem(withTitle: "重启试试", action: nil, keyEquivalent: "")
+        menuItem.submenu = submenu
         return menu
     }
     
